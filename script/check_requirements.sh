@@ -12,7 +12,12 @@
 DIR=$0
 CURRENTPATH=$PWD
 
-if [[ "$DIR" =~ check_requirements\.sh ]]; then
+if [ "$DIR" = "./check_requirements.sh" ]
+then
+	DIR=$CURRENTPATH
+	DIR=${DIR/%\/script/}
+elif [[ "$DIR" =~ check_requirements\.sh ]]
+then
 	DIR=${DIR/%\/check_requirements\.sh/}
 	DIR=${DIR/%\/script/}
 	DIR=${DIR/#\./}
