@@ -37,9 +37,9 @@ sub ReadConf
 		$self->{"conf"}->{"BED_FILE_INDEX"} = $conf{"BED_FILE_INDEX"};
 	}
 
-	if ($conf{"BED_FILE_INDEX"} ne "")
+	if ($conf{"REF_DIR"} ne "")
 	{
-		if ($conf{"BED_FILE_INDEX"} =~ /\/$/)
+		if ($conf{"REF_DIR"} =~ /\/$/)
 		{
 			$self->{"conf"}->{"REF_DIR"} = $conf{"REF_DIR"};
 		}
