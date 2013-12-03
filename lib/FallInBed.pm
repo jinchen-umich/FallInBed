@@ -575,7 +575,7 @@ sub CreateMakeFile
 
 		print OUT "\n";
 
-		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.pl --indexSNPFile ".$self->{"conf"}->{"INDEX_DIR"}."annotated.index.snp.txt --refDIR $refDIR --cubeFileDIR ".$infileDIR." --minNeighbor ".$minNeighborNum." --indexSNPNeighborFile ".$outfileDIR."index.snp.neighbors.txt --logFile $logFile\'\n";
+		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.pl --indexSNPFile ".$self->{"conf"}->{"INDEX_DIR"}."annotated.index.snp.txt --cubeFileDIR ".$infileDIR." --minNeighbor ".$minNeighborNum." --indexSNPNeighborFile ".$outfileDIR."index.snp.neighbors.txt --logFile $logFile\'\n";
 		print OUT "\ttouch ".$outfileDIR."index.snp.neighbors.txt.OK\n\n";
 
 ############################################################################################
@@ -727,7 +727,7 @@ sub CreateMakeFile
 
 		print OUT "\n";
 
-		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.pl --indexSNPFile ".$self->{"conf"}->{"INDEX_DIR"}."annotated.index.snp.txt --refDIR $refDIR --cubeFileDIR ".$infileDIR." --minNeighbor ".$minNeighborNum." --indexSNPNeighborFile ".$outfileDIR."index.snp.neighbors.txt --logFile $logFile\'\n";
+		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.pl --indexSNPFile ".$self->{"conf"}->{"INDEX_DIR"}."annotated.index.snp.txt --cubeFileDIR ".$infileDIR." --minNeighbor ".$minNeighborNum." --indexSNPNeighborFile ".$outfileDIR."index.snp.neighbors.txt --logFile $logFile\'\n";
 		print OUT "\ttouch ".$outfileDIR."index.snp.neighbors.txt.OK\n\n";
 
 ############################################################################################
