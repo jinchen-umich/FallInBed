@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use FindBin qw($Bin);
+#use FindBin qw($Bin);
 use DB_File;
 use Switch;
 use Getopt::Long;
@@ -13,6 +13,7 @@ my $start = time;
 my $startTime = [gettimeofday()];
 
 my $neighborlist;
+my $refDIR;
 my $r2Threshold;
 my $ldWindowSize;
 my $chrid;
@@ -22,6 +23,7 @@ my $help;
 		  
 Getopt::Long::GetOptions(
       'neighborlist=s' => \$neighborlist,
+      'refDIR=s' => \$refDIR,
       'r2Threshold=f' => \$r2Threshold,
       'ldWindowSize=i' => \$ldWindowSize,
       'chrid=i' => \$chrid,
@@ -31,7 +33,7 @@ Getopt::Long::GetOptions(
 
 if (defined($help))
 {
-	print "perl find.neighbors.LDbuddy.pl --neighborlist neighborlist --r2Threshold r2Threshold --ldWindowSize ldWindowSize --chrid chrid --neighborLDlist neighborLDlist --logFile logFile\n";
+	print "perl find.neighbors.LDbuddy.pl --neighborlist neighborlist --refDIR refDIR --r2Threshold r2Threshold --ldWindowSize ldWindowSize --chrid chrid --neighborLDlist neighborLDlist --logFile logFile\n";
 	print "perl find.neighbors.LDbuddy.pl --help\n";
 				  
 	exit(0);
@@ -48,6 +50,24 @@ elsif (!(-e $neighborlist))
 	print "$neighborlist doesn't exist!\n";
 
 	exit(1);
+}
+
+if (!defined($refDIR))
+{
+	print "No define refDIR!\n";
+
+	exit(1);
+}
+elsif (!(-e $refDIR))
+{
+	print "refDIR ($refDIR) doesn't exist!\n";
+
+	exit(1);
+}
+
+if ($refDIR !~ /\/$/)
+{
+	$refDIR = $refDIR."/";
 }
 
 if (!defined($r2Threshold))
@@ -94,7 +114,7 @@ open (OUT,">".$neighborLDlist) || die "can't the file $neighborLDlist!\n";
 
 my %hash;
 
-my $dbm = "$Bin/../ref/chr$chrid.dbm";
+my $dbm = $refDIR."chr$chrid.dbm";
 
 if (-e $dbm)
 {
@@ -185,7 +205,7 @@ flock(SEM,LOCK_EX) or die "Lock failed: $!";
 
 open (OUT,">>".$logFile) || die "can't write to the file:$!\n";
 
-print OUT "perl find.neighbors.LDbuddy.pl --neighborlist $neighborlist --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrid $chrid --neighborLDlist $neighborLDlist --logFile $logFile start=$start end=$end runningTime=$runningTime\n";
+print OUT "perl find.neighbors.LDbuddy.pl --neighborlist $neighborlist --refDIR refDIR --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrid $chrid --neighborLDlist $neighborLDlist --logFile $logFile start=$start end=$end runningTime=$runningTime\n";
 
 close OUT;
 
