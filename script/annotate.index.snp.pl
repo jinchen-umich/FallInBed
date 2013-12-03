@@ -13,6 +13,7 @@ my $start = time;
 my $startTime = [gettimeofday()];
 
 my $indexSNPList;
+my $refDIR;
 my $cubeIDFile;
 my $r2Threshold;
 my $ldWindowSize;
@@ -25,6 +26,7 @@ my $help;
 		  
 Getopt::Long::GetOptions(
       'indexSNPList=s' => \$indexSNPList,
+      'refDIR=s' => \$refDIR,
       'cubeIDFile=s' => \$cubeIDFile,
       'r2Threshold=f' => \$r2Threshold,
       'ldWindowSize=i' => \$ldWindowSize,
@@ -37,7 +39,7 @@ Getopt::Long::GetOptions(
 
 if (defined($help))
 {
-	print "perl annotate.index.snp.pl --indexSNPList indexSNPList --cubeIDFile cubeIDFile --r2Threshold r2Threshold --ldWindowSize ldWindowSize --annotatedList annotatedList --nonannotatedList nonannotatedList --rsidSNPList rsidSNPList --indexSNPLDList indexSNPLDList --logFile logFile\n";
+	print "perl annotate.index.snp.pl --indexSNPList indexSNPList --refDIR refDIR --cubeIDFile cubeIDFile --r2Threshold r2Threshold --ldWindowSize ldWindowSize --annotatedList annotatedList --nonannotatedList nonannotatedList --rsidSNPList rsidSNPList --indexSNPLDList indexSNPLDList --logFile logFile\n";
 	print "perl annotate.index.snp.pl --help\n";
 				  
 	exit(0);
@@ -54,6 +56,24 @@ elsif (!(-e $indexSNPList))
 	print "$indexSNPList doesn't exist!\n";
 
 	exit(1);
+}
+
+if (!defined($refDIR))
+{
+	print "No define reference directory!\n";
+
+	exit(1);
+}
+elsif (!(-e $refDIR))
+{
+	print "refDIR($refDIR) doesn't exist!\n";
+
+	exit(1);
+}
+
+if ($refDIR !~ /\/$/)
+{
+	$refDIR = $refDIR."/";
 }
 
 if (!defined($cubeIDFile))
@@ -166,7 +186,7 @@ my $dictObj = new SNPDictionary;
 
 $dictObj->setVer("hg19");
 
-$dictObj->openSNPDB();
+$dictObj->openSNPDB($refDIR);
 
 sub Annotate
 {
@@ -185,7 +205,7 @@ sub Annotate
 		my $chr = $1;
 		my $pos = $2;
 
-		my $file = "$Bin/../ref/chr$chr.dbm";
+		my $file = $refDIR."chr$chr.dbm";
 
 		if (-e $file)
 		{
@@ -337,7 +357,7 @@ flock(SEM,LOCK_EX) or die "Lock failed: $!";
 
 open (OUT,">>".$logFile) || die "can't write to the file:$!\n";
 
-print OUT "perl annotate.index.snp.pl --indexSNPList $indexSNPList --cubeIDFile $cubeIDFile --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --annotatedList $annotatedList --nonannotatedList $nonannotatedList --rsidSNPList $rsidSNPList --indexSNPLDList $indexSNPLDList --logFile $logFile start=$start end=$end runningTime=$runningTime\n";
+print OUT "perl annotate.index.snp.pl --indexSNPList $indexSNPList --refDIR $refDIR --cubeIDFile $cubeIDFile --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --annotatedList $annotatedList --nonannotatedList $nonannotatedList --rsidSNPList $rsidSNPList --indexSNPLDList $indexSNPLDList --logFile $logFile start=$start end=$end runningTime=$runningTime\n";
 
 close OUT;
 
