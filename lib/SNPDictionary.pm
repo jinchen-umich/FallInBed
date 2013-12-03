@@ -4,7 +4,7 @@ package SNPDictionary;
 
 use strict;
 use warnings;
-use FindBin qw($Bin);
+#use FindBin qw($Bin);
 use DB_File;
 
 require Exporter;
@@ -45,6 +45,22 @@ sub openSNPDB
 {
 	my $self = shift;
 
+	my ($refDIR) = @_;
+
+	if (!(-e $refDIR))
+	{
+		print "reference file directory doesn't exist!\n";
+
+		exit(1);
+	}
+	else
+	{
+		if ($refDIR !~ /\/$/)
+		{
+			$refDIR = $refDIR."/";
+		}
+	}
+
 	print "Please wait for connecting with SNP database ......\n";
 
 	my $rs2chrposfile;
@@ -55,13 +71,13 @@ sub openSNPDB
 
 	if ($self->{"ver"} eq "hg18")
 	{
-		$rs2chrposfile = "$Bin/../ref/rsidToCHRPOS.hg18.dbm";
-		$chrpos2rsfile = "$Bin/../ref/CHRPOSTorsid.hg18.dbm";
+		$rs2chrposfile = $refDIR."rsidToCHRPOS.hg18.dbm";
+		$chrpos2rsfile = $refDIR."CHRPOSTorsid.hg18.dbm";
 	}
 	elsif ($self->{"ver"} eq "hg19")
 	{
-		$rs2chrposfile = "$Bin/../ref/rsidToCHRPOS.hg19.dbm";
-		$chrpos2rsfile = "$Bin/../ref/CHRPOSTorsid.hg19.dbm";
+		$rs2chrposfile = $refDIR."rsidToCHRPOS.hg19.dbm";
+		$chrpos2rsfile = $refDIR."CHRPOSTorsid.hg19.dbm";
 	}
 
 	if (-e $rs2chrposfile)
