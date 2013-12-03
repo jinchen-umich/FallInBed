@@ -37,6 +37,18 @@ sub ReadConf
 		$self->{"conf"}->{"BED_FILE_INDEX"} = $conf{"BED_FILE_INDEX"};
 	}
 
+	if ($conf{"BED_FILE_INDEX"} ne "")
+	{
+		if ($conf{"BED_FILE_INDEX"} =~ /\/$/)
+		{
+			$self->{"conf"}->{"REF_DIR"} = $conf{"REF_DIR"};
+		}
+		else
+		{
+			$self->{"conf"}->{"REF_DIR"} = $conf{"REF_DIR"}."/";
+		}
+	}
+
 	if ($conf{"R2THRESHOLD"} ne "")
 	{
 		$self->{"conf"}->{"R2THRESHOLD"} = $conf{"R2THRESHOLD"};
@@ -92,7 +104,7 @@ sub ReadConf
 	$self->{"conf"}->{"CUBE_DIR"} = $self->{"conf"}->{"OUT_DIR"}."cube/";
 	
 	$self->{"conf"}->{"SCRIPT_DIR"} = "$Bin/../script/";
-	$self->{"conf"}->{"REF_DIR"} = "$Bin/../ref/";
+#	$self->{"conf"}->{"REF_DIR"} = "$Bin/../ref/";
 }
 
 sub VerifyConf
@@ -126,6 +138,22 @@ sub VerifyConf
 		if (!(-e $self->{"conf"}->{"BED_FILE_INDEX"}))
 		{
 			print "Bed file index doesn't exist!\n";
+
+			exit(1);
+		}
+	}
+
+	if (!defined($self->{"conf"}->{"REF_DIR"}))
+	{
+		print "Please specify the directory of reference files!\n";
+
+		exit(1);
+	}
+	else
+	{
+		if (!(-e $self->{"conf"}->{"REF_DIR"}))
+		{
+			print "The reference directory which you defined in config file doesn't exist!\n";
 
 			exit(1);
 		}
