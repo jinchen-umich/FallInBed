@@ -557,7 +557,7 @@ sub CreateMakeFile
 		for (my $i = 1; $i < 23; $i++)
 		{
 			print OUT $outfileDIR."neighbor.chr$i.LDbuddy.txt.OK\t:\t$infileDIR"."index.snp.neighbors.txt.OK\n";
-			print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.LDbuddy.pl --neighborlist ".$infileDIR."index.snp.neighbors.txt --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrid $i --neighborLDlist ".$outfileDIR."neighbor.chr$i.LDbuddy.txt --logFile $logFile\'\n";
+			print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.LDbuddy.pl --neighborlist ".$infileDIR."index.snp.neighbors.txt --refDIR $refDIR --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrid $i --neighborLDlist ".$outfileDIR."neighbor.chr$i.LDbuddy.txt --logFile $logFile\'\n";
 			print OUT "\ttouch ".$outfileDIR."neighbor.chr$i.LDbuddy.txt.OK\n\n";
 		}
 
@@ -575,7 +575,7 @@ sub CreateMakeFile
 
 		print OUT "\n";
 
-		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.pl --indexSNPFile ".$self->{"conf"}->{"INDEX_DIR"}."annotated.index.snp.txt --cubeFileDIR ".$infileDIR." --minNeighbor ".$minNeighborNum." --indexSNPNeighborFile ".$outfileDIR."index.snp.neighbors.txt --logFile $logFile\'\n";
+		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.pl --indexSNPFile ".$self->{"conf"}->{"INDEX_DIR"}."annotated.index.snp.txt --refDIR $refDIR --cubeFileDIR ".$infileDIR." --minNeighbor ".$minNeighborNum." --indexSNPNeighborFile ".$outfileDIR."index.snp.neighbors.txt --logFile $logFile\'\n";
 		print OUT "\ttouch ".$outfileDIR."index.snp.neighbors.txt.OK\n\n";
 
 ############################################################################################
@@ -584,7 +584,7 @@ sub CreateMakeFile
 		$outfileDIR = $self->{"conf"}->{"INDEX_DIR"};
 
 		print OUT $outfileDIR."index.snp.txt.OK\t:\t".$self->{"conf"}->{"INDEX_SNP_FILE"}." ".$infileDIR."cube.id.txt.OK\n";
-		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."annotate.index.snp.pl --indexSNPList ".$self->{"conf"}->{"INDEX_SNP_FILE"}." --cubeIDFile ".$infileDIR."cube.id.txt --r2Threshold ".$r2Threshold." --ldWindowSize ".$ldWindowSize." --annotatedList ".$outfileDIR."annotated.index.snp.txt --nonannotatedList ".$outfileDIR."nonannoted.index.snp.txt --rsidSNPList ".$outfileDIR."rsid.index.snp.txt --indexSNPLDList ".$outfileDIR."index.snp.LD.txt --logFile $logFile\'\n";
+		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."annotate.index.snp.pl --indexSNPList ".$self->{"conf"}->{"INDEX_SNP_FILE"}." --refDIR $refDIR --cubeIDFile ".$infileDIR."cube.id.txt --r2Threshold ".$r2Threshold." --ldWindowSize ".$ldWindowSize." --annotatedList ".$outfileDIR."annotated.index.snp.txt --nonannotatedList ".$outfileDIR."nonannoted.index.snp.txt --rsidSNPList ".$outfileDIR."rsid.index.snp.txt --indexSNPLDList ".$outfileDIR."index.snp.LD.txt --logFile $logFile\'\n";
 		print OUT "\ttouch ".$outfileDIR."index.snp.txt.OK\n\n";
 
 ############################################################################################
@@ -625,7 +625,7 @@ sub CreateMakeFile
 		{
 			print OUT $outfileDIR."chr$i.maf.dist.ldnum.txt.OK\t:\t".$infileDIR."chr$i.dbm\n";
 
-			print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."calculate.maf.dist.ldnum.pl --chrid ".$i." --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrout ".$outfileDIR."chr$i.maf.dist.ldnum.txt --distributionFile ".$outfileDIR."chr$i.distribution.txt --logFile $logFile\'\n";
+			print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."calculate.maf.dist.ldnum.pl --chrid ".$i." --refDIR $refDIR --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrout ".$outfileDIR."chr$i.maf.dist.ldnum.txt --distributionFile ".$outfileDIR."chr$i.distribution.txt --logFile $logFile\'\n";
 			print OUT "\ttouch ".$outfileDIR."chr$i.maf.dist.ldnum.txt.OK\n\n";
 		}
 	}
@@ -709,7 +709,7 @@ sub CreateMakeFile
 		for (my $i = 1; $i < 23; $i++)
 		{
 			print OUT $outfileDIR."neighbor.chr$i.LDbuddy.txt.OK\t:\t$infileDIR"."index.snp.neighbors.txt.OK\n";
-			print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.LDbuddy.pl --neighborlist ".$infileDIR."index.snp.neighbors.txt --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrid $i --neighborLDlist ".$outfileDIR."neighbor.chr$i.LDbuddy.txt --logFile $logFile\'\n";
+			print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.LDbuddy.pl --neighborlist ".$infileDIR."index.snp.neighbors.txt --refDIR $refDIR --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrid $i --neighborLDlist ".$outfileDIR."neighbor.chr$i.LDbuddy.txt --logFile $logFile\'\n";
 			print OUT "\ttouch ".$outfileDIR."neighbor.chr$i.LDbuddy.txt.OK\n\n";
 		}
 
@@ -727,7 +727,7 @@ sub CreateMakeFile
 
 		print OUT "\n";
 
-		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.pl --indexSNPFile ".$self->{"conf"}->{"INDEX_DIR"}."annotated.index.snp.txt --cubeFileDIR ".$infileDIR." --minNeighbor ".$minNeighborNum." --indexSNPNeighborFile ".$outfileDIR."index.snp.neighbors.txt --logFile $logFile\'\n";
+		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."find.neighbors.pl --indexSNPFile ".$self->{"conf"}->{"INDEX_DIR"}."annotated.index.snp.txt --refDIR $refDIR --cubeFileDIR ".$infileDIR." --minNeighbor ".$minNeighborNum." --indexSNPNeighborFile ".$outfileDIR."index.snp.neighbors.txt --logFile $logFile\'\n";
 		print OUT "\ttouch ".$outfileDIR."index.snp.neighbors.txt.OK\n\n";
 
 ############################################################################################
@@ -736,7 +736,7 @@ sub CreateMakeFile
 		$outfileDIR = $self->{"conf"}->{"INDEX_DIR"};
 
 		print OUT $outfileDIR."index.snp.txt.OK\t:\t".$self->{"conf"}->{"INDEX_SNP_FILE"}." ".$infileDIR."cube.id.txt\n";
-		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."annotate.index.snp.pl --indexSNPList ".$self->{"conf"}->{"INDEX_SNP_FILE"}." --cubeIDFile ".$infileDIR."cube.id.txt --r2Threshold ".$r2Threshold." --ldWindowSize ".$ldWindowSize." --annotatedList ".$outfileDIR."annotated.index.snp.txt --nonannotatedList ".$outfileDIR."nonannoted.index.snp.txt --rsidSNPList ".$outfileDIR."rsid.index.snp.txt --indexSNPLDList ".$outfileDIR."index.snp.LD.txt --logFile $logFile\'\n";
+		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."annotate.index.snp.pl --indexSNPList ".$self->{"conf"}->{"INDEX_SNP_FILE"}." --refDIR $refDIR --cubeIDFile ".$infileDIR."cube.id.txt --r2Threshold ".$r2Threshold." --ldWindowSize ".$ldWindowSize." --annotatedList ".$outfileDIR."annotated.index.snp.txt --nonannotatedList ".$outfileDIR."nonannoted.index.snp.txt --rsidSNPList ".$outfileDIR."rsid.index.snp.txt --indexSNPLDList ".$outfileDIR."index.snp.LD.txt --logFile $logFile\'\n";
 		print OUT "\ttouch ".$outfileDIR."index.snp.txt.OK\n\n";
 	}
 
