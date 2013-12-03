@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use FindBin qw($Bin);
+#use FindBin qw($Bin);
 use Switch;
 use Getopt::Long;
 use Time::HiRes qw[gettimeofday tv_interval];
