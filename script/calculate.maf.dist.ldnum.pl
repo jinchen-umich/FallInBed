@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use FindBin qw($Bin);
+#use FindBin qw($Bin);
 use DB_File;
 use Switch;
 use Getopt::Long;
@@ -13,6 +13,7 @@ my $start = time;
 my $startTime = [gettimeofday()];
 
 my $chrid;
+my $refDIR;
 my $r2Threshold;
 my $ldWindowSize;
 my $chrout;
@@ -22,6 +23,7 @@ my $help;
 
 Getopt::Long::GetOptions(
 			'chrid=i' => \$chrid,
+			'refDIR=s' => \$refDIR,
 			'r2Threshold=f' => \$r2Threshold,
 			'ldWindowSize=i' => \$ldWindowSize,
 			'chrout=s' => \$chrout,
@@ -31,7 +33,7 @@ Getopt::Long::GetOptions(
 
 if (defined($help))
 {
-	print "perl calculate.maf.dist.ldnum.pl --chrid chrid --r2Threshold r2Threshold --ldWindowSize ldWindowSize --chrout chrout --distributionFile distributionFile --logFile logFile\n";	
+	print "perl calculate.maf.dist.ldnum.pl --chrid chrid --refDIR refDIR --r2Threshold r2Threshold --ldWindowSize ldWindowSize --chrout chrout --distributionFile distributionFile --logFile logFile\n";	
 	print "perl calculate.maf.dist.ldnum.pl --help\n";
 
 	exit(0);
@@ -42,6 +44,27 @@ if (!defined($chrid))
 	print "No define chrid!\n";
 
 	exit(1);
+}
+
+if (!defined($refDIR))
+{
+	print "No define refDIR!\n";
+
+	exit(1);
+}
+else
+{
+	if (!(-e $refDIR))
+	{
+		print "refDIR ($refDIR) doesn't exist!\n";
+
+		exit(1);
+	}
+}
+
+if ($refDIR !~ /\/$/)
+{
+	$refDIR = $refDIR."/";
 }
 
 if (!defined($r2Threshold))
@@ -93,7 +116,7 @@ if (!defined($logFile))
 
 my $logFileLock = $logFile.".lck";
 
-my $dbm = "$Bin/../ref/chr$chrid.dbm";
+my $dbm = $refDIR."chr$chrid.dbm";
 my %hash;
 
 if (!(-e $dbm))
@@ -205,7 +228,7 @@ flock(SEM,LOCK_EX) or die "Lock failed: $!";
 
 open (OUT,">>".$logFile) || die "can't write to the file:$!\n";
 
-print OUT "perl calculate.maf.dist.ldnum.pl --chrid $chrid --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrout $chrout --distributionFile $distributionFile --logFile $logFile start=$start end=$end runningTime=$runningTime\n";
+print OUT "perl calculate.maf.dist.ldnum.pl --chrid $chrid --refDIR refDIR --r2Threshold $r2Threshold --ldWindowSize $ldWindowSize --chrout $chrout --distributionFile $distributionFile --logFile $logFile start=$start end=$end runningTime=$runningTime\n";
 
 close OUT;
 
