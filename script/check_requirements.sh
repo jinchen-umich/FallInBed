@@ -16,7 +16,7 @@ if [ "$DIR" = "./check_requirements.sh" ]
 then
 	DIR=$CURRENTPATH
 	DIR=${DIR/%\/script/}
-elif [[ "$DIR" =~ check_requirements\.sh ]]
+elif [[ "$DIR" =~ check_requirements.sh ]]
 then
 	DIR=${DIR/%\/check_requirements\.sh/}
 	DIR=${DIR/%\/script/}
@@ -31,9 +31,11 @@ banner="#============================================================"
 #================================================================
 if [ ! -d /etc/apt ]; then
     echo $banner
-    echo "#   We are not ready for non-Debian systems'"
+    echo "#   We are not ready for non-Debian systems"
     echo $banner
     exit 1
+else
+		echo "Good, you are in Debian system"
 fi
 
 #================================================================
