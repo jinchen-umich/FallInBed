@@ -120,6 +120,16 @@ if (!defined($logFile))
 	exit(1);
 }
 
+my ($sec,$min,$hour,$day,$mon,$year,$weekday,$yeardate,$savinglightday) = (localtime(time));
+$sec = ($sec < 10)? "0$sec":$sec;
+$min = ($min < 10)? "0$min":$min;
+$hour = ($hour < 10)? "0$hour":$hour;
+$day = ($day < 10)? "0$day":$day;
+$mon = ($mon < 9)? "0".($mon+1):($mon+1);
+$year += 1900;
+
+my $now = "$year-$mon-$day $hour:$min:$sec";
+
 my $logFileLock = $logFile.".lck";
 
 use lib "$Bin/../lib";
@@ -282,7 +292,7 @@ flock(SEM,LOCK_EX) or die "Lock failed: $!";
 
 open (OUT,">>".$logFile) || die "can't write to the file:$!\n";
 
-print OUT "perl overlap.pl --indexSNPList $indexSNPList --neighborSNPList $neighborSNPList --chrid $chrid --sortedBedFile $sortedBedFile --resultDIR $resultDIR --logFile $logFile start=$startRunning end=$endRunning runningTime=$runningTime\n";	
+print OUT "$now perl overlap.pl --indexSNPList $indexSNPList --neighborSNPList $neighborSNPList --chrid $chrid --sortedBedFile $sortedBedFile --resultDIR $resultDIR --logFile $logFile start=$startRunning end=$endRunning runningTime=$runningTime\n";	
 
 close OUT;
 
