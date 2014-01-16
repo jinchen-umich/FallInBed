@@ -23,7 +23,11 @@ use strict;
 use warnings;
 use Getopt::Long;
 use FindBin qw($Bin);
+use threads;
+use threads::shared;
 
+my $startTime = timePoint();;
+			
 my %hConf;
 
 #############################################################################
@@ -137,17 +141,134 @@ $FallInBedInstance->CheckSNPList();
 #Create result directories
 $FallInBedInstance->CreateAllDIR();
 
-# Creating make file
-print "Please waiting for creating makefile ...!\n";
+# Create and run make files
 $FallInBedInstance->CreateMakeFile();
 
-print "--------------------------------------------------------------------------------------------------------\n\n";
+print "Running ... ...\n";
+print "You can check the status in the log file: ".$FallInBedInstance->{"conf"}->{"OUT_DIR"}."FallInBed.log\n\n";
 
-print "Finished creating makefile ".$FallInBedInstance->{"conf"}->{"OUT_DIR"}."Makefile\n\n";
+my $jobs = $FallInBedInstance->{"conf"}->{"JOBNUMBER"};
+my $makeFile = $FallInBedInstance->{"conf"}->{"OUT_DIR"}."MakeFile";
+my $topNBed = $FallInBedInstance->{"conf"}->{"TOPNBEDFILES"};
 
-print "Try 'make -f ".$FallInBedInstance->{"conf"}->{"OUT_DIR"}."MakeFile -n | less' for a sanity check before running\n";
-print "Run 'make -f ".$FallInBedInstance->{"conf"}->{"OUT_DIR"}."MakeFile -j[#parallel jobs]'\n";
+if (!(defined($topNBed)))
+{
+	$topNBed = 0;
+}
 
-print "--------------------------------------------------------------------------------------------------------\n";
+my $thread_num : shared = 0;
+
+my $logFile = $FallInBedInstance->{"conf"}->{"OUT_DIR"}."FallInBed.log";
+my $totalTaskes = `grep touch $makeFile | wc -l`;
+$totalTaskes = $totalTaskes + $topNBed * 22 + 1;
+
+my $thread = threads->create(\&progressBar,$logFile,$totalTaskes);
+$thread_num ++;
+$thread->detach();
+
+$thread = threads->create(\&runMakeFile,$makeFile,$jobs);
+$thread_num ++;
+$thread->detach();
+
+#########$thread = threads->create(\&progressBar,$logFile,$totalTaskes);
+#########$thread_num ++;
+#########$thread->detach();
+
+while ($thread_num > 1)
+{
+	sleep(5);
+}
+
+if ($topNBed > 0)
+{
+	$FallInBedInstance->CreateTopNBedMakeFile();
+
+	$makeFile = $FallInBedInstance->{"conf"}->{"OUT_DIR"}."TopNBed.MakeFile";
+
+	$thread = threads->create(\&runMakeFile,$makeFile,$jobs);
+	$thread_num ++;
+	$thread->detach();
+}
+
+while ($thread_num > 1)
+{
+	sleep(5);
+}
+
+print "\r $totalTaskes / $totalTaskes (100%)\n";
+
+my $endTime = timePoint();
+
+print "start at $startTime; finish at $endTime\n";
+
+sub runMakeFile
+{
+	my ($thisMakeFile,$thisJobs) = @_;
+
+	`make -f $thisMakeFile -j$thisJobs`;
+
+	$thread_num --;
+
+	return 1;
+}
+
+sub progressBar
+{
+	my ($log,$taskes) = @_;
+
+	my $n = 0;
+
+	while ($thread_num >= 1)
+	{
+		local $| = 1;
+	
+		my @progress_symbol = ('-','\\','|','/');
+
+		my $lines = 0;
+
+		if (-e $log)
+		{
+			$lines = `wc -l $log`;
+			my @fields = split(/\ /,$lines);
+			$lines = $fields[0];
+		}
+
+		my $percent = $lines / $taskes;
+		$percent = int($percent * 100);
+
+#		print "\r $progress_symbol[$n] $lines / $taskes";
+		print "\r $progress_symbol[$n] $lines / $taskes ($percent%)";
+		
+		$n = ($n>=3)? 0:$n+1;
+		
+		select(undef, undef, undef, 0.1); # sleep 0.2 sec
+	
+		local $| = 0;
+	}
+
+	local $| = 0;
+
+	print "\r\n";
+
+	$thread_num --;
+
+	return 1;
+}
+
+sub	timePoint
+{
+	my ($sec,$min,$hour,$day,$mon,$year,$weekday,$yeardate,$savinglightday) = (localtime(time));
+	
+	$sec = ($sec < 10)? "0$sec":$sec;
+	$min = ($min < 10)? "0$min":$min;
+	$hour = ($hour < 10)? "0$hour":$hour;
+	$day = ($day < 10)? "0$day":$day;
+	$mon = ($mon < 9)? "0".($mon+1):($mon+1);
+	$year += 1900;
+	
+	my $time = "$year-$mon-$day $hour:$min:$sec";
+
+	return ($time);
+}
 
 exit(0);
