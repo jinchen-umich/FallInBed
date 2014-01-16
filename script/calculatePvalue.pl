@@ -58,13 +58,23 @@ if (!(-e $neighborFile))
 	exit(1);
 }
 
-
 if (!defined($logFile))
 {
 	print "Please define logFile!\n";
 	
 	exit(1);
 }
+
+my ($sec,$min,$hour,$day,$mon,$year,$weekday,$yeardate,$savinglightday) = (localtime(time));
+$sec = ($sec < 10)? "0$sec":$sec;
+$min = ($min < 10)? "0$min":$min;
+$hour = ($hour < 10)? "0$hour":$hour;
+$day = ($day < 10)? "0$day":$day;
+$mon = ($mon < 9)? "0".($mon+1):($mon+1);
+$year += 1900;
+
+my $now = "$year-$mon-$day $hour:$min:$sec";
+
 
 my $logFileLock = $logFile.".lck";
 
@@ -204,37 +214,6 @@ my $result = $bedFilesDIR."PValue.txt";
 $BinomialRandomDistributionObj->{"pValueFile"} = $result;
 $BinomialRandomDistributionObj->writeToFile();
 
-=pod
-print  "pvalue\t=\t".$BinomialRandomDistributionObj->{"pvalue"};
-print  "\n";
-print  "error\t=\t".$BinomialRandomDistributionObj->{"error"};
-print  "\n";
-print  "k\t=\t".$BinomialRandomDistributionObj->{"k"};
-print  "\n";
-print  "x1\t=\t".$BinomialRandomDistributionObj->{"x1"};
-print  "\n";
-print  "x2\t=\t".$BinomialRandomDistributionObj->{"x2"};
-print  "\n";
-print  "u\t=\t".$BinomialRandomDistributionObj->{"u"};
-print  "\n";
-print  "fu\t=\t".$BinomialRandomDistributionObj->{"fu"};
-print  "\n";
-print  "ku\t=\t".$BinomialRandomDistributionObj->{"ku"};
-print  "\n";
-print  "kdu\t=\t".$BinomialRandomDistributionObj->{"kdu"};
-print  "\n";
-print  "w\t=\t".$BinomialRandomDistributionObj->{"w"};
-print  "\n";
-print  "kd2u\t=\t".$BinomialRandomDistributionObj->{"kd2u"};
-print  "\n";
-print  "u1\t=\t".$BinomialRandomDistributionObj->{"u1"};
-print  "\n";
-print  "kd2Zero\t=\t".$BinomialRandomDistributionObj->{"kd2Zero"};
-print  "\n";
-print  "kd3Zero\t=\t".$BinomialRandomDistributionObj->{"kd3Zero"};
-print  "\n";
-=cut
-
 my $end = time;
 
 my $runningTime = tv_interval($startTime) * 1000;
@@ -245,7 +224,7 @@ flock(SEM,LOCK_EX) or die "Lock failed: $!";
 
 open (OUT,">>".$logFile) || die "can't write to the file:$!\n";
 
-print OUT "perl calculatePvalue.pl --bedFilesDIR $bedFilesDIR --neighborFile $neighborFile --logFile $logFile start=$start end=$end runningTime=$runningTime\n";	
+print OUT "$now perl calculatePvalue.pl --bedFilesDIR $bedFilesDIR --neighborFile $neighborFile --logFile $logFile start=$start end=$end runningTime=$runningTime\n";	
 
 close OUT;
 
