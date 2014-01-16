@@ -8,7 +8,7 @@ use FindBin qw($Bin);
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(ReadConf VerifyConf CheckBedFiles CheckSNPList CreateMakeFile);
+our @EXPORT = qw(ReadConf VerifyConf CheckBedFiles CheckSNPList CreateMakeFile CreateTopNBedMakeFile);
 
 sub new
 {
@@ -99,12 +99,21 @@ sub ReadConf
 		$self->{"conf"}->{"MOSRUN"} = $conf{"MOSRUN"};
 	}
 
+	if ($conf{"TOPNBEDFILES"} ne "")
+	{
+		$self->{"conf"}->{"TOPNBEDFILES"} = $conf{"TOPNBEDFILES"};
+	}
+
+	if ($conf{"JOBNUMBER"} ne "")
+	{
+		$self->{"conf"}->{"JOBNUMBER"} = $conf{"JOBNUMBER"};
+	}
+
 	$self->{"conf"}->{"INDEX_DIR"} = $self->{"conf"}->{"OUT_DIR"}."index_SNP/";
 	$self->{"conf"}->{"NEIGHBOR_DIR"} = $self->{"conf"}->{"OUT_DIR"}."neighbor_SNP/";
 	$self->{"conf"}->{"CUBE_DIR"} = $self->{"conf"}->{"OUT_DIR"}."cube/";
 	
 	$self->{"conf"}->{"SCRIPT_DIR"} = "$Bin/../script/";
-#	$self->{"conf"}->{"REF_DIR"} = "$Bin/../ref/";
 }
 
 sub VerifyConf
@@ -217,6 +226,26 @@ sub VerifyConf
 		print "Please specify MOSRUN for parallel computing!\n";
 
 		exit(1);
+	}
+
+	if (defined($self->{"conf"}->{"TOPNBEDFILES"}))
+	{
+		if ($self->{"conf"}->{"TOPNBEDFILES"} !~ /^\d+$/)
+		{
+			print "Please specify top N bed files! It should be a number!\n";
+
+			exit(1);
+		}
+	}
+
+	if (defined($self->{"conf"}->{"JOBNUMBER"}))
+	{
+		if ($self->{"conf"}->{"JOBNUMBER"} !~ /^\d+$/)
+		{
+			print "Please specify the job number when runing!\n";
+
+			exit(1);
+		}
 	}
 }
 
@@ -738,6 +767,169 @@ sub CreateMakeFile
 		print OUT $outfileDIR."index.snp.txt.OK\t:\t".$self->{"conf"}->{"INDEX_SNP_FILE"}." ".$infileDIR."cube.id.txt\n";
 		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."annotate.index.snp.pl --indexSNPList ".$self->{"conf"}->{"INDEX_SNP_FILE"}." --refDIR $refDIR --cubeIDFile ".$infileDIR."cube.id.txt --r2Threshold ".$r2Threshold." --ldWindowSize ".$ldWindowSize." --annotatedList ".$outfileDIR."annotated.index.snp.txt --nonannotatedList ".$outfileDIR."nonannoted.index.snp.txt --rsidSNPList ".$outfileDIR."rsid.index.snp.txt --indexSNPLDList ".$outfileDIR."index.snp.LD.txt --logFile $logFile\'\n";
 		print OUT "\ttouch ".$outfileDIR."index.snp.txt.OK\n\n";
+	}
+
+	close OUT;
+}
+
+sub CreateTopNBedMakeFile
+{
+	my $self = shift;
+
+	my $scriptDIR = $self->{"conf"}->{"SCRIPT_DIR"};
+
+  my $makefile = $self->{"conf"}->{"OUT_DIR"}."TopNBed.MakeFile";
+
+  my $logFile = $self->{"conf"}->{"OUT_DIR"}."FallInBed.log";
+
+	my $perlCMD = "perl";
+
+	my $bedFileIndex = $self->{"conf"}->{"BED_FILE_INDEX"};
+	my $sortedBedFileDIR = $self->{"conf"}->{"SORTED_BED_FILE_DIR"};
+	my $StatisticSummaryFile = $self->{"conf"}->{"OUT_DIR"}."StatisticSummaryFile.txt";
+
+	open (IN,$StatisticSummaryFile) || die "can't open the file!\n";
+
+	my $readline = <IN>;
+
+	my %pValueHash;
+	undef %pValueHash;
+
+	while (defined($readline=<IN>))
+	{
+		chomp $readline;
+
+		my @fields = split(/\t/,$readline);
+		my $bedFile = $fields[0];
+		my $pvalue = $fields[3];
+
+		$pValueHash{$bedFile} = $pvalue;
+	}
+
+	close IN;
+
+	my @pValueArr;
+	undef @pValueArr;
+
+	foreach my $bedFile (sort{$pValueHash{$a}<=>$pValueHash{$b}} keys %pValueHash)
+	{
+		my $k = int(@pValueArr);
+		$pValueArr[$k] = $bedFile;
+	}
+
+	my $topN = $self->{"conf"}->{"TOPNBEDFILES"};
+
+	if ($topN > int(@pValueArr))
+	{
+		$topN = int(@pValueArr);
+	}
+
+	my @sortedBedFiles;
+	my @sortedBedOKFiles;
+	undef @sortedBedFiles;
+	undef @sortedBedOKFiles;
+
+	if ($self->{"conf"}->{"BEDFILE_IS_SORTED"} ne "True")
+	{
+		for (my $i = 0; $i < int(@pValueArr); $i++)
+		{
+			my $bedFileName = $pValueArr[$i];
+			
+			$sortedBedFiles[$i] = $self->{"conf"}->{"OUT_DIR"}."sortedBedFiles/".$bedFileName.".sorted";
+			
+			$sortedBedOKFiles[$i] = $self->{"conf"}->{"OUT_DIR"}."sortedBedFiles/".$bedFileName.".sorted.OK";
+		}
+	}
+	else
+	{
+## Read Bed Files from Bed index File
+		open (IN,$bedFileIndex) || die "can't open the file $bedFileIndex";
+		
+		my %bedFileHash;
+		undef %bedFileHash;
+
+		while (defined($readline=<IN>))
+		{
+			chomp $readline;
+			my @fields = split(/\//,$readline);
+			my $k = int(@fields) - 1;
+			my $bedFileName = $fields[$k];
+
+			$bedFileHash{$bedFileName} = $readline;
+		}
+		
+		close IN;
+
+		for (my $i = 0; $i < int(@pValueArr); $i++)
+		{
+			my $bedFileName = $pValueArr[$i];
+			
+			if (exists($bedFileHash{$bedFileName}))
+			{
+				$sortedBedFiles[$i] = $bedFileHash{$bedFileName};
+			
+				$sortedBedOKFiles[$i] = $self->{"conf"}->{"OUT_DIR"}."sortedBedFiles/".$bedFileName.".sorted.OK";
+			}
+			else
+			{
+				print "can't find the bed file: $bedFileName in bed index file!\n";
+
+				exit(1);
+			}
+		}
+	}
+
+	my $topNDIR = $self->{"conf"}->{"OUT_DIR"}."index.SNP.and.LD.for.top.$topN.bed/";
+
+	`mkdir --p $topNDIR`;
+
+	open (OUT,">".$makefile) || die "can't write to the file:$makefile!\n";
+
+## create MakeFile
+############################################################################################
+	print OUT ".DELETE_ON_ERROR:\n\n";
+
+	print OUT "all\t:\t".$self->{"conf"}->{"OUT_DIR"}."top.$topN.bed.OK\n\n";
+
+############################################################################################
+	
+	print OUT $self->{"conf"}->{"OUT_DIR"}."top.$topN.bed.OK\t:";
+
+	for (my $i = 0; $i < $topN; $i++)
+	{
+		print OUT "\t".$topNDIR."index.SNP.and.LD.in.bed.".$pValueArr[$i].".txt.OK";	
+	}
+
+	print OUT "\n";
+
+	print OUT "\ttouch ".$self->{"conf"}->{"OUT_DIR"}."top.$topN.bed.OK\n\n";
+
+############################################################################################
+
+	for (my $i = 0; $i < $topN; $i++)
+	{
+		print OUT $topNDIR."index.SNP.and.LD.in.bed.".$pValueArr[$i].".txt.OK\t:";
+
+		for (my $j = 1; $j < 23; $j++)
+		{
+			print OUT "\t".$topNDIR.$pValueArr[$i].".chr$j.txt.OK";
+		}
+
+		print OUT "\n";
+
+		print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."merge.index.SNP.and.LD.in.bed.pl --bedFileName $pValueArr[$i] --inDIR $topNDIR --outDIR $topNDIR --logFile $logFile\'\n";
+		print OUT "\ttouch ".$topNDIR.$pValueArr[$i].".txt.OK\n\n";
+	}
+
+############################################################################################
+	for (my $i = 0; $i < $topN; $i++)
+	{
+		for (my $j = 1; $j < 23; $j++)
+		{
+			print OUT $topNDIR.$pValueArr[$i].".chr$j.txt.OK\t:\t".$self->{"conf"}->{"OUT_DIR"}."StatisticSummaryFile.txt.OK\n";
+			print OUT "\t".$self->{"conf"}->{"MOSRUN"}." \'$perlCMD ".$scriptDIR."check.index.snp.and.lds.in.bed.pl --indexSNPLDFile ".$self->{"conf"}->{"OUT_DIR"}."index_SNP/index.snp.LD.txt --sortedBedFile $sortedBedFiles[$i] --chrid $j --SNPInBedFile $topNDIR"."$pValueArr[$i].chr$j.txt --logFile $logFile\'\n";
+			print OUT "\ttouch ".$topNDIR.$pValueArr[$i].".chr$j.txt.OK\n\n";
+		}
 	}
 
 	close OUT;
