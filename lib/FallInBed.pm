@@ -803,7 +803,10 @@ sub CreateTopNBedMakeFile
 		my $bedFile = $fields[0];
 		my $pvalue = $fields[3];
 
-		$pValueHash{$bedFile} = $pvalue;
+		if ($pvalue =~ /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/)
+		{
+			$pValueHash{$bedFile} = $pvalue;
+		}
 	}
 
 	close IN;
